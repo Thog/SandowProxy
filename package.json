@@ -1,0 +1,21 @@
+{
+  "name": "sandowproxy",
+  "version": "1.0.0",
+  "description": "Node.js based Minecraft Server Proxy",
+  "main": "app.js",
+  "dependencies": {
+    "minecraft-protocol" : "0.14.0",
+    "buffertools": "^2.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "minecraft",
+    "proxy",
+    "sandow"
+  ],
+  "author": "Thog",
+  "license": "MIT"
+}
