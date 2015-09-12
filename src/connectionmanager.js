@@ -154,8 +154,6 @@ ConnectionManager.prototype.redirect = function (sender, serverName) {
 
     // TODO: Implement ServerInfo system
     sender.isRedirecting = true;
-    sender.clientConnection.write("respawn", {dimension: 1, difficulty: 0, gameMode: 0, levelType: "default"});
-    sender.clientConnection.write("respawn", {dimension: -1, difficulty: 0, gameMode: 0, levelType: "default"});
     sender.serverConnection.removeAllListeners("end");
     sender.serverConnection.end("Redirectng");
     sender.serverConnection.socket.end();
@@ -174,8 +172,28 @@ ConnectionManager.prototype.redirect = function (sender, serverName) {
 
     // FIXME: position problem when you are redirected
     setupProxyClient(sender.serverConnection);
+    sender.serverConnection.on("login", function(packet) {
+
+        // Dimension switcher
+        sender.clientConnection.write("respawn", {dimension: 1, difficulty: 0, gameMode: 0, levelType: "default"});
+
+        // Real data for client
+        sender.clientConnection.write("respawn", {dimension: packet.dimension, difficulty: packet.difficulty, gameMode: packet.gameMode, levelType: packet.levelType});
+
+        // Fix GameMode (TODO: Find why respawn packet is bugged)
+        sender.clientConnection.write("game_state_change", {reason: 3, gameMode: packet.gameMode})
+    });
     sender.isRedirecting = false;
     sender.currentServer = targetServer;
 };
+
+ConnectionManager.prototype.exit = function()
+{
+    for (var username in players) {
+        var proxyPlayer = players[username]
+        proxyPlayer.serverConnection.end("Stopping")
+    };
+    process.exit()
+}
 
 module.exports = ConnectionManager;
