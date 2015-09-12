@@ -24,8 +24,14 @@
 
 var servers = {
     "fallback": {
+        name: "fallback",
         host: "localhost",
         port: 9945
+    },
+    "srv2": {
+        name: "srv2",
+        host: "localhost",
+        port: 9946
     }
 };
 
@@ -135,7 +141,6 @@ ConnectionManager.prototype.connect = function (client) {
                     return;
 
                 if (proxyPlayer.serverConnection.state != client.state) {
-                    console.info(packet);
                     return
                 }
 
@@ -152,16 +157,28 @@ ConnectionManager.prototype.connect = function (client) {
 
 ConnectionManager.prototype.redirect = function (sender, serverName) {
 
+    if (servers[serverName] == null)
+    {
+        sender.clientConnection.write("chat", {message: JSON.stringify({
+            extra: [{"color": "red", text: serverName + " not found!"}],
+            text: ""
+        })});
+        return;
+    } else if (servers[serverName] == sender.currentServer)
+    {
+        sender.clientConnection.write("chat", {message: JSON.stringify({
+            extra: [{"color": "red", text: "You are already connected to this server!"}],
+            text: ""
+        })});
+        return;
+    }
     // TODO: Implement ServerInfo system
     sender.isRedirecting = true;
     sender.serverConnection.removeAllListeners("end");
     sender.serverConnection.end("Redirectng");
     sender.serverConnection.socket.end();
 
-    var targetServer = {
-        host: "localhost",
-        port: 9946
-    };
+    var targetServer = servers[serverName];
     sender.serverConnection = mc.createClient({
         host: targetServer.host,
         port: targetServer.port,
@@ -190,10 +207,12 @@ ConnectionManager.prototype.redirect = function (sender, serverName) {
 ConnectionManager.prototype.exit = function()
 {
     for (var username in players) {
-        var proxyPlayer = players[username]
+        var proxyPlayer = players[username];
         proxyPlayer.serverConnection.end("Stopping")
     };
     process.exit()
 }
+
+ConnectionManager.prototype.players = players;
 
 module.exports = ConnectionManager;

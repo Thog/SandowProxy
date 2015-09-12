@@ -24,28 +24,15 @@
 
 module.exports.onCommand = function(connectionManager, sender, args)
 {
-    if (args[2] == null)
+    if (args[1] == null)
     {
         sender.clientConnection.write("chat", {message: JSON.stringify({
-            extra: [{"color": "red", text: "Usage: /send <player> <server>"}],
-            text: ""
-        })});
-        return;
-    }
-
-    if (args[1] != null && connectionManager.players[args[1]] != null)
-    {
-        sender.clientConnection.write("chat", {message: JSON.stringify({
-            extra: [{"color": "green", text: "Redirecting " + sender.clientConnection.username + " to " + args[2]}],
-            text: ""
-        })});
-        connectionManager.redirect(connectionManager.players[args[1]], args[2]);
-
-    } else {
-        sender.clientConnection.write("chat", {message: JSON.stringify({
-            extra: [{"color": "red", text: "Player not found!"}],
+            extra: [{"color": "gold", text: "You are currently connected to " + sender.currentServer.name}],
             text: ""
         })});
     }
-
-};
+    else
+    {
+        connectionManager.redirect(sender, args[1])
+    }
+}
