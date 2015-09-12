@@ -21,22 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  **/
+
+var Commander = require("./src/commander"),
+    commander = new Commander(),
+    config = null;
+
 var ConnectionManager = require("./src/connectionmanager"),
-    Commander = require("./src/commander"),
-    mc = require("minecraft-protocol");
+    mc = require("minecraft-protocol"),
+    fs = require("fs"),
+    connectionManager = new ConnectionManager();
+function Proxy()
+{
+    config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+    commander.load("./src/commands");
+    this.getConfig = function () {
+        return config
+    };
 
-var commander = new Commander();
-commander.load("./src/commands");
-var connectionManager = new ConnectionManager(commander);
+    this.getCommander = function () {
+        return commander
+    };
 
-var options = {
-    motd: 'Sandow',
-    'max-players': 3000,
-    port: 25565,
-    'online-mode': true,
-};
+    this.getConnectionManager = function () {
+        return connectionManager
+    }
+}
 
-var server = mc.createServer(options);
+proxy = new Proxy();
+connectionManager.proxy = proxy;
+connectionManager.servers = config.servers;
+
+
+var server = mc.createServer(config.proxyServerConfig);
 
 
 server.on("login", function (mcClient) {
@@ -49,3 +65,5 @@ server.on('error', function () {
 
     }
 );
+
+module.exports = Proxy;

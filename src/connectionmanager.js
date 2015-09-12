@@ -22,27 +22,11 @@
  * THE SOFTWARE.
  **/
 
-var servers = {
-    "fallback": {
-        name: "fallback",
-        host: "localhost",
-        port: 9945
-    },
-    "srv2": {
-        name: "srv2",
-        host: "localhost",
-        port: 9946
-    }
-};
-
-var commander = null;
-
 var players = [],
     mc = require("minecraft-protocol"),
     states = mc.states;
 
-function ConnectionManager(commandManager) {
-    commander = commandManager;
+function ConnectionManager() {
 }
 
 var packetBlacklist = [/*0x04, 0x2f, 0x30*/];
@@ -93,13 +77,15 @@ function setupProxyClient(serverConnection) {
 }
 
 ConnectionManager.prototype.connect = function (client) {
+    var self = this;
+
     players[client.username] = {
         isRedirecting: false,
         clientConnection: client,
-        currentServer: servers.fallback,
+        currentServer: self.servers.fallback,
         serverConnection: mc.createClient({
-            host: servers.fallback.host,
-            port: servers.fallback.port,
+            host: self.servers.fallback.host,
+            port: self.servers.fallback.port,
             username: client.username,
             'online-mode': true,
             keepAlive: false
@@ -124,11 +110,9 @@ ConnectionManager.prototype.connect = function (client) {
         if (!proxyPlayer.serverConnection.ended)
             proxyPlayer.serverConnection.end("Error");
     });
-
-    var self = this;
     client.on('packet', function (packet) {
             if (!proxyPlayer.serverConnection.ended) {
-                if (packet.id == 1 && packet.message != null && packet.message.indexOf("/") == 0 && commander.dispatchCommand(self, proxyPlayer, packet.message)) {
+                if (packet.id == 1 && packet.message != null && packet.message.indexOf("/") == 0 && self.proxy.getCommander().dispatchCommand(self, proxyPlayer, packet.message)) {
                     return;
                 }
 
@@ -157,14 +141,16 @@ ConnectionManager.prototype.connect = function (client) {
 
 ConnectionManager.prototype.redirect = function (sender, serverName) {
 
-    if (servers[serverName] == null)
+    var self = this;
+
+    if (self.servers[serverName] == null)
     {
         sender.clientConnection.write("chat", {message: JSON.stringify({
             extra: [{"color": "red", text: serverName + " not found!"}],
             text: ""
         })});
         return;
-    } else if (servers[serverName] == sender.currentServer)
+    } else if (self.servers[serverName] == sender.currentServer)
     {
         sender.clientConnection.write("chat", {message: JSON.stringify({
             extra: [{"color": "red", text: "You are already connected to this server!"}],
@@ -172,13 +158,13 @@ ConnectionManager.prototype.redirect = function (sender, serverName) {
         })});
         return;
     }
-    // TODO: Implement ServerInfo system
+
     sender.isRedirecting = true;
     sender.serverConnection.removeAllListeners("end");
     sender.serverConnection.end("Redirectng");
     sender.serverConnection.socket.end();
 
-    var targetServer = servers[serverName];
+    var targetServer = self.servers[serverName];
     sender.serverConnection = mc.createClient({
         host: targetServer.host,
         port: targetServer.port,
@@ -187,7 +173,6 @@ ConnectionManager.prototype.redirect = function (sender, serverName) {
         keepAlive: false
     });
 
-    // FIXME: position problem when you are redirected
     setupProxyClient(sender.serverConnection);
     sender.serverConnection.on("login", function(packet) {
 
@@ -211,7 +196,7 @@ ConnectionManager.prototype.exit = function()
         proxyPlayer.serverConnection.end("Stopping")
     };
     process.exit()
-}
+};
 
 ConnectionManager.prototype.players = players;
 

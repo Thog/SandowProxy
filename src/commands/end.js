@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  **/
 
-module.exports.onCommand = function(connectionManager, sender, args)
+module.exports.onCommand = function(connectionManager)
 {
     connectionManager.exit();
-}
+};

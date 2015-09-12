@@ -1,0 +1,20 @@
+{
+  "proxyServerConfig": {
+    "motd": "Sandow",
+    "max-players": 3000,
+    "port": 25565,
+    "online-mode": true
+  },
+  "servers": {
+    "fallback": {
+      "name": "fallback",
+      "host": "localhost",
+      "port": 9945
+    },
+    "srv2": {
+      "name": "srv2",
+      "host": "localhost",
+      "port": 9946
+    }
+  }
+}

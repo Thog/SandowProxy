@@ -35,4 +35,4 @@ module.exports.onCommand = function(connectionManager, sender, args)
     {
         connectionManager.redirect(sender, args[1])
     }
-}
+};
