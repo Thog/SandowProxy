@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  **/
 
-var commands = []
+var commands = [];
 
 function Commander() {
 }
@@ -44,29 +44,29 @@ function walk(currentDirPath, callback) {
 
 load = function(addonsDir)
 {
-    var path = require("path")
-    console.log("Loading commands...");
+    var path = require("path");
+    console.log("Commands: [LOADING]");
     walk(addonsDir , function(filePath, name)
     {
-        var command = require(path.resolve(filePath));
-        commands[name.replace(".js", "")] = command
+        var commandName = name.replace(".js", "");
+        console.log("Commands: " + commandName + " loaded.");
+        commands[commandName] = require(path.resolve(filePath));
     });
+    console.log("Commands: [OK]");
 };
 
 reload = function(addonDir)
 {
-    var path = require("path")
-
     console.log("Unloading commands...");
     walk(addonDir, function(filePath, name)
     {
         console.log("Unloading " + name);
         delete require.cache[require.resolve(filePath)];
     });
-    commands = []
+    commands = [];
     load(addonDir);
     console.log("Reload complete");
-}
+};
 
 Commander.prototype.load = load;
 Commander.prototype.reload = reload;
@@ -76,11 +76,11 @@ Commander.prototype.dispatchCommand = function(connectionManager, proxyPlayer, m
     var command = commands[args[0].replace("/", "")];
     if (command != null)
     {
-        command.onCommand(connectionManager, proxyPlayer, args)
+        command.onCommand(connectionManager, proxyPlayer, args);
         return true;
     }
 
     return false;
-}
+};
 
 module.exports = Commander;

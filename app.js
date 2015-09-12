@@ -23,11 +23,10 @@
  **/
 var ConnectionManager = require("./src/connectionmanager"),
     Commander = require("./src/commander"),
-    mc = require("minecraft-protocol"),
-    path = require("path");
+    mc = require("minecraft-protocol");
 
 var commander = new Commander();
-commander.load("./src/commands")
+commander.load("./src/commands");;
 var connectionManager = new ConnectionManager(commander);
 
 var options = {
@@ -37,11 +36,11 @@ var options = {
     'online-mode': true,
 };
 
-var server = mc.createServer(options)
+var server = mc.createServer(options);
 
 
 server.on("login", function (mcClient) {
-    console.log("New connection " + mcClient.username + " (" + mcClient.uuid + ")")
+    console.log("New connection " + mcClient.username + " (" + mcClient.uuid + ")");
     connectionManager.connect(mcClient)
 });
 

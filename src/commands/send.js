@@ -29,8 +29,9 @@ module.exports.onCommand = function(connectionManager, sender, args)
         sender.clientConnection.write("chat", {message: JSON.stringify({
             extra: [{"color": "red", text: "Usage: /send <player> <server>"}],
             text: ""
-        })})
+        })});
         return;
     }
-    console.log("Redirecting " + sender.clientConnection.username + " to " + args[2]);
-}
+    connectionManager.redirect(sender, args[2]);
+    console.log("Redirecting " + sender.clientConnection.username + " to " + args[2])
+};
