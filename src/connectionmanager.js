@@ -128,6 +128,21 @@ function onServerError(err) {
 
     console.log('Connection error by server', '(' + proxyPlayer.currentServer.host + ":" + proxyPlayer.currentServer.port + ') ', err);
     console.log(err.stack);
+
+    if (!client.ended && !proxyPlayer.isRedirecting && proxyPlayer.currentServer.name != "fallback") {
+        proxyPlayer.clientConnection.write("chat", {
+            message: JSON.stringify({
+                extra: [{
+                    "color": "red",
+                    text: "The server you were previously on went down, you have been connected to the fallback server"
+                }],
+                text: ""
+            })
+        });
+        instance.redirect(proxyPlayer, "fallback");
+        return;
+    }
+
     if (!client.ended)
         client.end("Error");
 }
