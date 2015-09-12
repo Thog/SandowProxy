@@ -21,32 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  **/
-var ConnectionManager = require("./src/connectionmanager"),
-    Commander = require("./src/commander"),
-    mc = require("minecraft-protocol"),
-    path = require("path");
 
-var commander = new Commander();
-commander.load("./src/commands")
-var connectionManager = new ConnectionManager(commander);
-
-var options = {
-    motd: 'Sandow',
-    'max-players': 3000,
-    port: 25565,
-    'online-mode': true,
-};
-
-var server = mc.createServer(options)
-
-
-server.on("login", function (mcClient) {
-    console.log("New connection " + mcClient.username + " (" + mcClient.uuid + ")")
-    connectionManager.connect(mcClient)
-});
-
-
-server.on('error', function () {
-
+module.exports.onCommand = function(connectionManager, sender, args)
+{
+    if (args[2] == null)
+    {
+        sender.clientConnection.write("chat", {message: JSON.stringify({
+            extra: [{"color": "red", text: "Usage: /send <player> <server>"}],
+            text: ""
+        })})
+        return;
     }
-);
+    console.log("Redirecting " + sender.clientConnection.username + " to " + args[2]);
+}

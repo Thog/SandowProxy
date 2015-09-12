@@ -29,11 +29,14 @@ var servers = {
     }
 }
 
+var commander = null;
+
 var players = [],
     mc = require("minecraft-protocol"),
     states = mc.states;
 
-function ConnectionManager() {
+function ConnectionManager(commandManager) {
+    commander = commandManager;
 }
 
 
@@ -74,7 +77,15 @@ ConnectionManager.prototype.connect = function (client) {
 
     client.on('packet', function (packet) {
             if (!proxyPlayer.serverConnection.ended)
+            {
+                if (packet.id == 1 && packet.message != null && packet.message.indexOf("/") == 0 && commander.dispatchCommand(this, proxyPlayer, packet.message))
+                {
+                    return;
+                }
                 proxyPlayer.serverConnection.write(packet.id, packet);
+
+            }
+
         }
     );
 
