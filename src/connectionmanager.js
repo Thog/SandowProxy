@@ -112,7 +112,9 @@ function onServerPacket(packet) {
         else if (packet.reason != null && proxyPlayer.currentServer.name != "fallback" && !proxyPlayer.isRedirecting) {
             return;
         }
-        if (!client.ended) {
+        var clientPacketName = mc.packetNames[client.state]["toClient"][packet.id];
+
+        if (!client.ended && clientPacketName) {
             client.write(packet.id, packet);
         }
 
@@ -222,13 +224,9 @@ ConnectionManager.prototype.connect = function (client) {
                     return;
                 }
 
-                var packetInfo = mc.packetFields[client.state]["toServer"][packet.id];
-                if (!packetInfo)
+                var serverPacketName = mc.packetNames[client.state]["toServer"][packet.id];
+                if (!serverPacketName || proxyPlayer.serverConnection.state != client.state)
                     return;
-
-                if (proxyPlayer.serverConnection.state != client.state) {
-                    return
-                }
 
                 proxyPlayer.serverConnection.write(packet.id, packet);
 
